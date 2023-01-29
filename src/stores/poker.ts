@@ -26,6 +26,9 @@ export const usePokerStore = defineStore('poker', {
         }
     },
     actions: {
+        setSeatData(users: seatItem[]) {
+            this.seatData = users
+        },
         setSeatUser(seatId: number, user: seatItem) {
             this.seatData = this.seatData.map((item: seatItem) => {
                 if (item.seatId === seatId) {

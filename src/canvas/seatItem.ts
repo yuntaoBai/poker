@@ -7,7 +7,7 @@ type optionsParams = {
     height: number
     top: number
     left: number,
-    nickNmae: string,
+    nickName: string,
     status?: number
     chip?: number,
     seatId: number,
@@ -21,12 +21,12 @@ export default fabric.util.createClass(fabric.Object, {
     objectCaching: false,
     initialize: function(options: optionsParams) {
         this.callSuper('initialize', options)
-        const {width, height, top, left, nickNmae, status, chip, seatId, address, mode} = options
+        const {width, height, top, left, nickName, status, chip, seatId, address, mode} = options
         this.width = width
         this.height = height
         this.top = top
         this.left = left
-        this.nickNmae = nickNmae
+        this.nickName = nickName
         this.selectable = false
         this.alias = 'seatItem'
         this.status = status || 0 // 0 初始 1 让牌 2 跟注 3 加注 4 弃牌
@@ -67,7 +67,7 @@ export default fabric.util.createClass(fabric.Object, {
         ctx.fillText(this.chip, 0, y + this.height - 4, this.width)
         ctx.fillStyle = '#fff'
         ctx.font= '18px Arial'
-        ctx.fillText(this.nickNmae, 0, 10, this.width)
+        ctx.fillText(this.nickName, 0, 10, this.width)
         if (this.contdown) {
             contdown(ctx, {
                 x,
@@ -92,7 +92,7 @@ export default fabric.util.createClass(fabric.Object, {
                 onComplete: () => {
                     this.mode = key
                     if (this.seatId === account.seatId) {
-                        this.nickNmae = account.nickName
+                        this.nickName = account.nickName
                         this.address = account.address
                         this.chip = account.chip
                     }
@@ -103,7 +103,7 @@ export default fabric.util.createClass(fabric.Object, {
         })
     },
     userPlay(user: any) {
-        this.nickNmae = user.nickName
+        this.nickName = user.nickName
         this.address = user.address
         this.chip = user.chip
     },
@@ -114,17 +114,15 @@ export default fabric.util.createClass(fabric.Object, {
         this.animate('_angle', 360, {
             duration: time * 1000,
             onChange: (e:number) => {
-                const num = parseInt(((time / 360) * e))
+                const num = parseInt(String(((time / 360) * e)))
                 if (count !== num) {
                     count = num
-                    console.log(count, 66666666)
                     this.time = time - count
                 }
                 this.canvas.renderAll()
             },
             onComplete: () => {
                 this.contdown = false
-                console.log(4444444)
             }
 
         })

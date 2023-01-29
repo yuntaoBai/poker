@@ -34,13 +34,13 @@ export default fabric.util.createClass(fabric.Object, {
             const left =  seatParams[item].left
             const accountIndex = this.getAccountIndex()
             const userIndex = (index + accountIndex) > 7 ? (index + accountIndex) - 8 :  index + accountIndex
-            const {nickNmae, chip, status, seatId, address} = this.users[userIndex]
+            const {nickName, chip, status, seatId, address} = this.users[userIndex]
             const seatItem = new SeatItem({
                 width,
                 height,
                 top,
                 left,
-                nickNmae,
+                nickName,
                 chip,
                 status,
                 seatId,
@@ -51,9 +51,9 @@ export default fabric.util.createClass(fabric.Object, {
             this.canvas.add(seatItem)
         })
         this.seatObjects = seatObjects
-        console.log(this.seatObjects)
     },
     createAccount(account: any) {
+        console.log(account, 88888)
         this.seatObjects.forEach((item: any) => {
             item.accountPlay(account, account.mode - 1)
         })
