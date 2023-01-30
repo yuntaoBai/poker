@@ -13,7 +13,7 @@ export default fabric.util.createClass(fabric.Object, {
         this.selectable = false
         this.users = options.users
         this.account = options.account
-        this.seatObjects = []
+        this.seatObjects = {}
     },
     getAccountIndex() {
         let accountIndex = 0
@@ -28,7 +28,8 @@ export default fabric.util.createClass(fabric.Object, {
         return accountIndex
     },
     _render: function(ctx: any) {
-        const seatObjects: any[] = []
+        console.log(this.users)
+        // const seatObjects: any[] = []
         seatKeys.forEach((item, index) => {
             const top = seatParams[item].top
             const left =  seatParams[item].left
@@ -47,23 +48,16 @@ export default fabric.util.createClass(fabric.Object, {
                 address,
                 mode: item
             })
-            seatObjects.push(seatItem)
+            this.seatObjects[seatId] = seatItem
+            // seatObjects.push(seatItem)
             this.canvas.add(seatItem)
         })
-        this.seatObjects = seatObjects
+        // this.seatObjects = seatObjects
     },
-    createAccount(account: any) {
-        console.log(account, 88888)
-        this.seatObjects.forEach((item: any) => {
-            item.accountPlay(account, account.mode - 1)
-        })
-    },
-    createUser(user: any) {
-        this.seatObjects.forEach((item: any) => {
-            if (item.seatId === user.seatId) {
-                item.userPlay(user)
-                item.setCondown()
-            }
+    resetUsers(users: any[]) {
+        console.log(users)
+        users.forEach(user => {
+            this.seatObjects[user.seatId].resetSeatItem(user)
         })
     }
 })

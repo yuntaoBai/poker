@@ -7,7 +7,12 @@ export const useAccountStore = defineStore('account', {
             nickName: 'BYT',
             chip: 5000,
             status: 0,
-            headImg: ''
+            headImg: '',
+            play: {
+                status: false,
+                seatId: -1,
+                mode: -1
+            }
         }
     },
     actions: {
@@ -25,6 +30,9 @@ export const useAccountStore = defineStore('account', {
         },
         setHeadImg(value: string) {
             this.headImg = value
+        },
+        setPlay(value: {status: boolean, seatId: number, mode: number}) {
+            this.play = value
         }
     }
 })

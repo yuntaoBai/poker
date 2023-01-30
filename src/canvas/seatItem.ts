@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
 import seatParams from '../config/seat'
 import {fillRoundRect, strokeRoundRect, contdown} from '../utils/canvas'
+import PokerItem from './pokerItem'
 
 type optionsParams = {
     width: number
@@ -18,7 +19,6 @@ type optionsParams = {
 const statusText = ['', '让牌', '跟注', '加注', '弃牌']
 
 export default fabric.util.createClass(fabric.Object, {
-    objectCaching: false,
     initialize: function(options: optionsParams) {
         this.callSuper('initialize', options)
         const {width, height, top, left, nickName, status, chip, seatId, address, mode} = options
@@ -37,13 +37,35 @@ export default fabric.util.createClass(fabric.Object, {
         this.contdown = false
         this._angle = 0
         this.time = 15
+        this.count = 0
+        console.log(this.top -  (this.height * 0.4) * 2 - 5, this.left - 8, mode)
+        this.pokerWidth = 96 * 0.4
+        this.pokerOne = new PokerItem({
+            top: seatParams[this.mode].ptop,
+            left: this.left - this.pokerWidth * 0.2,
+            type: 'bg',
+            alias: 'poker',
+            display: true,
+            zoom: 0.4
+        }, (window as any).canvasPokerImageObject).scale(0.4)
+        this.pokerTwo = new PokerItem({
+            top: seatParams[this.mode].ptop ,
+            left: this.left - this.pokerWidth * 0.2 + this.pokerWidth,
+            type: 'bg',
+            alias: 'poker',
+            display: true,
+            zoom: 0.4
+        }, (window as any).canvasPokerImageObject).scale(0.4)
 
     },
     _render: function(ctx: any) {
+        this.ctx = ctx
         const x = -this.width/2
         const y = -this.height/2
         if (this.address) {
             this.renderItem(ctx, x, y)
+            this.canvas.add(this.pokerOne)
+            this.canvas.add(this.pokerTwo)
         } else {
             this.renderAddItem(ctx, x, y)
         }
@@ -80,32 +102,41 @@ export default fabric.util.createClass(fabric.Object, {
             }, this._angle)
         }
     },
-    accountPlay(account: any, count: number) {
-        return new Promise((resolve) => {
-            const key = this.mode - count  < 1 ? 8 +  this.mode - count :  this.mode - count
-            this.animate({
-                left: seatParams[key].left,
-                top: seatParams[key].top
-            }, {
-                duration: 500,
-                onChange: this.canvas.renderAll.bind(this.canvas),
-                onComplete: () => {
-                    this.mode = key
-                    if (this.seatId === account.seatId) {
-                        this.nickName = account.nickName
-                        this.address = account.address
-                        this.chip = account.chip
-                    }
-                    resolve(this)
+    resetSeatItem(user: any) {
+        if (this.address) {
+            this.pokerOne.animateMove({
+                top: seatParams[user.mode].ptop + (140 * 0.4) / 2,
+                left: seatParams[user.mode].left - this.pokerWidth * 0.2 +  + (96 * 0.4) / 2
+            }, 500)
+            this.pokerTwo.animateMove({
+                top: seatParams[user.mode].ptop + (140 * 0.4) / 2,
+                left: seatParams[user.mode].left - this.pokerWidth * 0.2 +  + (96 * 0.4) / 2 + this.pokerWidth
+            }, 500)
+        }
+        this.animate({
+            left: seatParams[user.mode].left,
+            top: seatParams[user.mode].top
+        }, {
+            duration: 500,
+            onChange: () => this._render(this.ctx),
+            onComplete: () => {
+                console.log(user, 999999)
+                this.mode = user.mode
+                this.nickName = user.nickName
+                this.address = user.address
+                this.chip = user.chip
+                this.card = user.card
+                if (!!user.contdown) {
+                    this.setCondown()
                 }
+                if (this.card) {
+                    this.pokerOne.animateFlip(this.card[0].type + this.card[0].value, 0.4)
+                    this.pokerTwo.animateFlip(this.card[1].type + this.card[1].value, 0.4)
+                }
+                this._render(this.ctx)
+            }
 
-            })
         })
-    },
-    userPlay(user: any) {
-        this.nickName = user.nickName
-        this.address = user.address
-        this.chip = user.chip
     },
     setCondown() {
         const time = this.time
@@ -123,6 +154,7 @@ export default fabric.util.createClass(fabric.Object, {
             },
             onComplete: () => {
                 this.contdown = false
+                this._render(this.ctx)
             }
 
         })

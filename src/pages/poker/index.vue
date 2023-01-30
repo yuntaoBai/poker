@@ -13,6 +13,7 @@ import {useCreateSeat} from '../../hooks/useCreateSeat'
 import emitter from '../../utils/emitter'
 import {usePokerStore} from '../../stores/poker'
 import {useAccountStore} from '../../stores/account'
+import Poker from "../../canvas/poker";
 
 const route = useRoute()
 // const a = getCurrentInstance()
@@ -20,7 +21,6 @@ const socket: any = inject('socket')
 const pokerStore = usePokerStore()
 const accountStore = useAccountStore()
 onMounted(() => {
-    const account = ref<any>(null)
     const canvasMainWidth =  document.body.clientWidth
     const canvasMainHeight = document.body.clientHeight
     const canvas = new fabric.Canvas('canvas', { 
@@ -28,33 +28,73 @@ onMounted(() => {
         width: canvasMainWidth,
         height: canvasMainHeight
     })
-    const users = pokerStore.seatData
-    socket.emit('getRoomInfo', route.params.id)
-    socket.on('getRoomInfo', (res: string) => {
-        const data: {seats: any[], roomId: number, status: number} = JSON.parse(res)
-        pokerStore.setSeatData(data.seats)
-        useCreateSeat(canvas, data.seats)
+    const PokerImage: any = new Image()
+    PokerImage.src = '../src/assets/images/poker.png'
+    PokerImage.onload = (() => {
+        (window as any).canvasPokerImageObject = PokerImage
+        socket.emit('getRoomInfo', route.params.id)
+        socket.on('getRoomInfo', (res: string) => {
+            const data: {seats: any[], roomId: number, status: number} = JSON.parse(res)
+            pokerStore.setSeatData(data.seats)
+            useCreateSeat(canvas, data.seats)
+        })
+        setTimeout(() => {
+            socket.emit('addUser', {
+                address: 'accountStore.address',
+                nickName: 'FGT',
+                chip: 643,
+                seatId: 5
+            })
+            socket.emit('addUser', {
+                address: 'accountStore.address',
+                nickName: 'FGT',
+                chip: 643,
+                seatId: 6
+            })
+            socket.emit('addUser', {
+                address: 'fdfdsfsd',
+                nickName: 'GHH',
+                chip: 4232,
+                seatId: 2
+            })
+            socket.emit('addUser', {
+                address: 'ffddsfsdfs',
+                nickName: 'AAA',
+                chip: 32312,
+                seatId: 7
+            })
+        }, 5000)
+        const s = 0.45
+        useCreatePoker(canvas,  `s1`, {
+            left: 76,
+            top: canvasMainHeight/2 - 48
+        }, s)
     })
-    
     canvas.on('mouse:down', (e: any) => {
         console.log(e)
         const target = e.target
-        if (target && target.alias === 'seatItem' && !target.address && !account.value) {
-            account.value = {
+        if (target && target.alias === 'seatItem' && !target.address && !accountStore.play.status) {
+            const account = {
                 address: accountStore.address,
                 nickName: accountStore.nickName,
                 chip: accountStore.chip,
-                mode: target.mode,
+                // mode: target.mode,
                 seatId: target.seatId
             }
-            emitter.emit('addAccount', account.value)
+            accountStore.setPlay({
+                status: true,
+                seatId: target.seatId,
+                mode: target.mode
+            })
+            socket.emit('addUser', account)
+            setTimeout(() => {
+                socket.emit('start')
+            }, 3000)
+            // socket.on('addUser', (user: any) => {
+            //     emitter.emit('addAccount', account)
+            // })
         }
     })
-    const s = 0.45
-    useCreatePoker(canvas,  `s1`, {
-        left: 76,
-        top: canvasMainHeight/2 - 48
-    }, s)
 })
 </script>
 
