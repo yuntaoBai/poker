@@ -25,12 +25,20 @@ export default fabric.util.createClass(fabric.Object, {
             left: 80,
             type: 'bg',
             alias: 'poker',
-            display: this.flopDisplay,
+            display: false,
             zoom: this.zoom
         })
     },
-    initItem(options: object) {
-        types.forEach(item => {
+    initItem(options: {width: number, height: number, top: number, left: number, type: string, alias: string, display: boolean, zoom: number}) {
+        const lefts = [
+            options.left,
+            options.left + options.width * this.zoom,
+            options.left + options.width * this.zoom * 2,
+            options.left + options.width * this.zoom * 3,
+            options.left + options.width * this.zoom * 4
+        ]
+        types.forEach((item, index) => {
+            options.left = lefts[index]
             this[item] = new PokerItem({...options}, this.image).scale(this.zoom)
         })
     },
@@ -41,39 +49,22 @@ export default fabric.util.createClass(fabric.Object, {
     },
     async addFlopItem(items: any[]) {
         const zoom = this.zoom
-        this[types[0]].animateFlip(items[0].type, zoom)
-
-        this[types[1]].animateMove({
-            left: this[types[0]].left + this[types[1]].width * zoom
-        }, 150).then((e: any) => {
-            e.animateFlip(items[1].type, zoom)
-        })
-
-        this[types[2]].animateMove({
-            left: this[types[0]].left + (this[types[2]].width * zoom) * 2
-        }, 150).then((e: any) => {
-            e.animateFlip(items[2].type, zoom)
+        this[types[0]].animateFlip(items[0].type, zoom).then(() => {
+            this[types[1]].animateFlip(items[1].type, zoom).then(() => {
+                this[types[2]].animateFlip(items[2].type, zoom)
+            })
         })
     },
     addTurnItem(item: any) {
         const zoom = this.zoom
-        this[types[3]].animateMove({
-            left: this[types[0]].left + (this[types[3]].width * zoom) * 3
-        }, 150).then((e: any) => {
-            e.animateFlip(item.type, zoom)
-        })
+        this[types[3]].animateFlip(item.type, zoom)
     },
     addRiverItem(item: any) {
         const zoom = this.zoom
-        this[types[4]].animateMove({
-            left: this[types[0]].left + (this[types[4]].width * zoom) * 4
-        }, 150).then((e: any) => {
-            e.animateFlip(item.type, zoom)
-        })
+        this[types[4]].animateFlip(item.type, zoom)
     },
     clearPokerItem() {
         types.forEach(item => {
-            this[item].left = 80
             this[item].type = 'bg'
             this[item]._display(false)
         })

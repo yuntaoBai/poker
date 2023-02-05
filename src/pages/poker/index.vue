@@ -32,67 +32,52 @@ onMounted(() => {
     PokerImage.src = '../src/assets/images/poker.png'
     PokerImage.onload = (() => {
         (window as any).canvasPokerImageObject = PokerImage
-        socket.emit('getRoomInfo', route.params.id)
-        socket.on('getRoomInfo', (res: string) => {
-            const data: {seats: any[], roomId: number, status: number} = JSON.parse(res)
+        socket.emit('game')
+        socket.on('data', (res: string) => {
+            const data: {seats: any[], id: number, status: number} = JSON.parse(res)
             pokerStore.setSeatData(data.seats)
             useCreateSeat(canvas, data.seats)
         })
         setTimeout(() => {
-            socket.emit('addUser', {
-                address: 'accountStore.address',
-                nickName: 'FGT',
-                chip: 643,
-                seatId: 5
+            socket.emit('betting', {
+                address: '12312312',
+                nickName: 'SDS',
+                chip: 2000,
+                place: 0
             })
-            socket.emit('addUser', {
-                address: 'accountStore.address',
-                nickName: 'FGT',
-                chip: 643,
-                seatId: 6
-            })
-            socket.emit('addUser', {
-                address: 'fdfdsfsd',
-                nickName: 'GHH',
-                chip: 4232,
-                seatId: 2
-            })
-            socket.emit('addUser', {
-                address: 'ffddsfsdfs',
-                nickName: 'AAA',
-                chip: 32312,
-                seatId: 7
-            })
+            setTimeout(() => {
+                socket.emit('betting', {
+                    address: '12312312',
+                    nickName: 'SDS',
+                    chip: 2000,
+                    place: 1
+                })
+            }, 10000)
         }, 5000)
-        const s = 0.45
-        useCreatePoker(canvas,  `s1`, {
-            left: 76,
-            top: canvasMainHeight/2 - 48
-        }, s)
+        // const s = 0.45
+        // useCreatePoker(canvas,  `s1`, {
+        //     left: 76,
+        //     top: canvasMainHeight/2 - 48
+        // }, s)
     })
     canvas.on('mouse:down', (e: any) => {
         console.log(e)
         const target = e.target
         if (target && target.alias === 'seatItem' && !target.address && !accountStore.play.status) {
             const account = {
-                address: accountStore.address,
-                nickName: accountStore.nickName,
-                chip: accountStore.chip,
-                // mode: target.mode,
-                seatId: target.seatId
+                seatId: target.seatId,
+                userInfo: {
+                    address: accountStore.address,
+                    nickName: accountStore.nickName,
+                    chip: accountStore.chip,
+                }
             }
             accountStore.setPlay({
                 status: true,
                 seatId: target.seatId,
                 mode: target.mode
             })
-            socket.emit('addUser', account)
-            setTimeout(() => {
-                socket.emit('start')
-            }, 3000)
-            // socket.on('addUser', (user: any) => {
-            //     emitter.emit('addAccount', account)
-            // })
+            socket.emit('add-user', account)
         }
     })
 })

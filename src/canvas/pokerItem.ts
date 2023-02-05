@@ -12,7 +12,7 @@ type optionsParams = {
     zoom: number
 }
 export default fabric.util.createClass(fabric.Image, {
-    objectCaching: false,
+    // objectCaching: false,
     originX: 'center',
     originY: 'center',
     initialize: function(options: optionsParams, image: any) {
@@ -48,24 +48,25 @@ export default fabric.util.createClass(fabric.Image, {
     animateFlip(type: string, zoom: number) {
         this._display(true)
         return new Promise((resolve, reject) => {
-            this.animate('scaleX', 0, {
-                duration: 150,
-                onChange: () => this.canvas.renderAll(),
-                onComplete: () => {
-                    this.type = type
-                    this.animate('scaleX', zoom, {
-                        duration: 100,
-                        onChange: () => this.canvas.renderAll(),
-                        onComplete: () => {
-                            resolve(this)
-                        }
-                    })
-                }
-            })
+            setTimeout(() => {
+                this.animate('scaleX', 0, {
+                    duration: 150,
+                    onChange: () => this.canvas.renderAll(),
+                    onComplete: () => {
+                        this.type = type
+                        this.animate('scaleX', zoom, {
+                            duration: 100,
+                            onChange: () => this.canvas.renderAll(),
+                            onComplete: () => {
+                                resolve(this)
+                            }
+                        })
+                    }
+                })
+            }, 100)
         })
     },
     animateMove(keys: object, duration: number) {
-        this._display(true)
         return new Promise((resolve, reject) => {
             this.animate({...keys}, {
                 duration,
